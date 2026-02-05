@@ -6,6 +6,7 @@ import logging
 import re
 from typing import Dict, Any, Optional
 from .base_rss_service import BaseRSSService
+from .stock_ticker_service import StockTickerService
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,14 @@ class FiercebiotechService(BaseRSSService):
         elif 'pubDate' in item:
             published_at = self.parse_fiercebiotech_date(item.get('pubDate'))
 
+        # Detect stock tickers using pattern matching (Fierce Biotech doesn't have ticker tags)
+        ticker_info = StockTickerService.detect_all(
+            title=title,
+            summary=summary,
+            content=content,
+            rss_item=None  # No RSS tags to extract from
+        )
+
         return {
             'guid': guid,
             'link': link,
@@ -168,5 +177,7 @@ class FiercebiotechService(BaseRSSService):
             'summary': summary,
             'content': content,
             'image_url': image_url,
-            'published_at': published_at
+            'published_at': published_at,
+            'stock_tickers': ticker_info['tickers'],
+            'company_names': ticker_info['companies']
         }

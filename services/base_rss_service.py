@@ -156,10 +156,11 @@ class BaseRSSService(ABC):
                 cursor.execute(
                     """
                     INSERT INTO rss_items (
-                        feed_id, guid, link, title, author, summary,
-                        content, image_url, published_at, fetched_at
+                        feed_id, guid, link, title, author, stock_tickers,
+                        company_names, summary, content, image_url,
+                        published_at, fetched_at
                     ) VALUES (
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     )
                     """,
                     (
@@ -168,6 +169,8 @@ class BaseRSSService(ABC):
                         item_data.get('link'),
                         item_data.get('title'),
                         item_data.get('author'),
+                        item_data.get('stock_tickers'),
+                        item_data.get('company_names'),
                         item_data.get('summary'),
                         item_data.get('content'),
                         item_data.get('image_url'),

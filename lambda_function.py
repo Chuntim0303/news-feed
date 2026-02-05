@@ -142,9 +142,10 @@ def search_news(db_config: Dict[str, str], params: Dict[str, Any]) -> Dict[str, 
             # Build query
             query = """
                 SELECT
-                    i.id, i.guid, i.link, i.title, i.author, i.summary,
-                    i.content, i.image_url, i.published_at, i.fetched_at,
-                    i.created_at, f.title as feed_title, f.url as feed_url
+                    i.id, i.guid, i.link, i.title, i.author, i.stock_tickers,
+                    i.company_names, i.summary, i.content, i.image_url,
+                    i.published_at, i.fetched_at, i.created_at,
+                    f.title as feed_title, f.url as feed_url
                 FROM rss_items i
                 JOIN rss_feeds f ON i.feed_id = f.id
                 WHERE 1=1
@@ -156,6 +157,17 @@ def search_news(db_config: Dict[str, str], params: Dict[str, Any]) -> Dict[str, 
                 query += " AND (i.title LIKE %s OR i.summary LIKE %s OR i.content LIKE %s)"
                 keyword = f"%{params['keyword']}%"
                 query_params.extend([keyword, keyword, keyword])
+
+            if params.get('ticker'):
+                # Search for ticker in stock_tickers field (comma-separated)
+                query += " AND (i.stock_tickers LIKE %s OR i.stock_tickers = %s)"
+                ticker = params['ticker']
+                query_params.extend([f"%{ticker}%", ticker])
+
+            if params.get('company'):
+                # Search for company name in company_names field
+                query += " AND i.company_names LIKE %s"
+                query_params.append(f"%{params['company']}%")
 
             if params.get('source'):
                 query += " AND f.title LIKE %s"

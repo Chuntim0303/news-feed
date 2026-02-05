@@ -5,6 +5,7 @@ Bloomberg RSS Feed Service
 import logging
 from typing import Dict, Any, Optional
 from .base_rss_service import BaseRSSService
+from .stock_ticker_service import StockTickerService
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,14 @@ class BloombergService(BaseRSSService):
         elif 'pubDate' in item:
             published_at = self.parse_datetime(item.get('pubDate'))
 
+        # Detect stock tickers (Bloomberg includes them in category tags)
+        ticker_info = StockTickerService.detect_all(
+            title=title,
+            summary=summary,
+            content=content,
+            rss_item=item  # Pass raw item for Bloomberg tag extraction
+        )
+
         return {
             'guid': guid,
             'link': link,
@@ -97,5 +106,8 @@ class BloombergService(BaseRSSService):
             'summary': self.clean_html(summary),
             'content': content,
             'image_url': image_url,
-            'published_at': published_at
+            'published_at': published_at,
+            'stock_tickers': ticker_info['tickers'],
+            'company_names': ticker_info['companies'],
+            'raw_item': item  # Keep raw item for debugging if needed
         }
