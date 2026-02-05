@@ -1,0 +1,13 @@
+# AWS Lambda RSS Feed Tracking System Requirements
+
+# RSS Feed Parsing
+feedparser==6.0.11
+
+# MySQL Database Driver
+PyMySQL==1.1.0
+
+# Date/Time Parsing
+python-dateutil==2.8.2
+
+# AWS Lambda Runtime (optional, already included in Lambda environment)
+# boto3==1.34.24
