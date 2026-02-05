@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://www.fiercebiotech.com/">
+  <channel>
+    <title>Fierce Biotech</title>
+    <link>https://www.fiercebiotech.com/</link>
+    <description>a feed of the latest articles on our website</description>
+    <language>en</language>
+    
+    <item>
+  <title><a href="/biotech/racing-bms-and-jj-bayer-links-asundexian-26-stroke-reduction-unblock-path-fda" hreflang="en">Racing BMS and J&amp;J, Bayer links asundexian to 26% stroke reduction to unblock path to FDA</a></title>
+  <link>https://www.fiercebiotech.com/biotech/racing-bms-and-jj-bayer-links-asundexian-26-stroke-reduction-unblock-path-fda</link>
+  <description>Bayer has linked asundexian to a 26% reduction in stroke in a phase 3 study, setting the bar for Bristol Myers Squibb and Johnson &amp;amp; Johnson’s rival factor XIa inhibitor in a blockbuster indication. </description>
+  <pubDate>Feb 5, 2026 4:54am</pubDate>
+    <dc:creator><a href="/person/nick-paul-taylor" hreflang="en">Nick Paul Taylor</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/991fd917-234a-458a-8098-e8ed7f0434ad</guid>
+    </item>
+<item>
+  <title><a href="/pharma/astellas-tops-expectations-vyloy-sales-surge-outshines-trial-setback" hreflang="en">Astellas tops expectations as Vyloy sales surge outshines trial setback</a></title>
+  <link>https://www.fiercebiotech.com/pharma/astellas-tops-expectations-vyloy-sales-surge-outshines-trial-setback</link>
+  <description>Astellas surpassed market expectations in its third-quarter fiscal year 2025 results, as first-in-class cancer drug Vyloy defied a trial setback to deliver quadrupled sales.</description>
+  <pubDate>Feb 5, 2026 10:31am</pubDate>
+    <dc:creator><a href="/person/angus-liu-0" hreflang="en">Angus Liu</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/9aa824a5-34b7-4ed6-af75-8599a1ed7343</guid>
+    </item>
+<item>
+  <title><a href="/medtech/ge-healthcare-posts-higher-full-year-revenues-amid-turbulent-tariff-times" hreflang="en">GE HealthCare posts higher full-year revenues amid turbulent tariff backdrop</a></title>
+  <link>https://www.fiercebiotech.com/medtech/ge-healthcare-posts-higher-full-year-revenues-amid-turbulent-tariff-times</link>
+  <description>GE HealthCare posted higher revenues for the fourth quarter and year-end as backlog orders stack up and the impact of an ongoing tariff battle initiated by the White House appears to be decreasing.&lt;br&gt;
+</description>
+  <pubDate>Feb 5, 2026 9:43am</pubDate>
+    <dc:creator><a href="/person/joseph-keenan" hreflang="en">Joseph Keenan</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/46bd8c87-5e40-4e33-b17b-e18033153119</guid>
+    </item>
+<item>
+  <title><a href="/biotech/angitia-raises-130m-challenge-amgen-bone-building-bispecifics" hreflang="en">Angitia raises $130M to challenge Amgen with bone-building bispecifics</a></title>
+  <link>https://www.fiercebiotech.com/biotech/angitia-raises-130m-challenge-amgen-bone-building-bispecifics</link>
+  <description>Angitia Biopharmaceuticals has unveiled its second mega-round in 14 months, revealing a $130 million series D financing that positions the biotech to take three bone disease prospects deeper into the clinic.</description>
+  <pubDate>Feb 5, 2026 9:34am</pubDate>
+    <dc:creator><a href="/person/nick-paul-taylor" hreflang="en">Nick Paul Taylor</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/c608611d-dc5b-442b-b8ac-940608541c9b</guid>
+    </item>
+<item>
+  <title><a href="/pharma/cut-above-hair-regrowth-biotech-veradermics-locks-oversubscribed-256m-ipo" hreflang="en">A cut above: Veradermics locks in $256M IPO and shares spike</a></title>
+  <link>https://www.fiercebiotech.com/pharma/cut-above-hair-regrowth-biotech-veradermics-locks-oversubscribed-256m-ipo</link>
+  <description>In its initial public offering, Veradermics sold a little over 15 million shares of common stock at $17 apiece, raising a total of $256.3 million in its entry onto the New York Stock Exchange, according to a Securities and Exchange Commission filing. Veradermics is trading under the symbol "MANE."</description>
+  <pubDate>Feb 5, 2026 9:43am</pubDate>
+    <dc:creator><a href="/person/fraiser-kansteiner-0" hreflang="en">Fraiser Kansteiner</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/0f7f0efe-af21-41d9-a887-813fbefcccaa</guid>
+    </item>
+<item>
+  <title><a href="/biotech/fierce-biotech-fundraising-tracker-26" hreflang="en">Fierce Biotech Fundraising Tracker '26: Angitia adds $130M series D; Third Arc circles up $52M</a></title>
+  <link>https://www.fiercebiotech.com/biotech/fierce-biotech-fundraising-tracker-26</link>
+  <description>The Fierce Biotech Fundraising Tracker records venture capital rounds of $50 million or more secured by biotechs. </description>
+  <pubDate>Dec 22, 2025 3:30pm</pubDate>
+    <dc:creator><a href="/person/gabrielle-masson-0" hreflang="en">Gabrielle Masson</a>, <a href="/person/james-waldron" hreflang="en">James Waldron</a>, <a href="/person/darren-incorvaia" hreflang="en">Darren Incorvaia</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/bf58aa8b-0112-4fdd-bc3a-2d9d8d084d9e</guid>
+    </item>
+<item>
+  <title><a href="/biotech/flagship-founded-antibody-biotech-generate-latest-mull-ipo" hreflang="en">Flagship-founded antibody biotech Generate is latest to mull IPO</a></title>
+  <link>https://www.fiercebiotech.com/biotech/flagship-founded-antibody-biotech-generate-latest-mull-ipo</link>
+  <description>Clinical-stage antibody company Generate:Biomedicines is the latest biotech to mull going public as momentum for IPOs continues to build.</description>
+  <pubDate>Feb 5, 2026 8:31am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/7d9b60b0-a0f5-41b9-b519-11a127a8efb8</guid>
+    </item>
+<item>
+  <title><a href="/biotech/quell-halts-liver-transplant-treg-trial-focus-preclinical-chill-not-kill-candidate" hreflang="en">Quell halts liver transplant Treg trial to focus on preclinical 'chill not kill' candidate</a></title>
+  <link>https://www.fiercebiotech.com/biotech/quell-halts-liver-transplant-treg-trial-focus-preclinical-chill-not-kill-candidate</link>
+  <description>Quell Therapeutics is pressing pause on an engineered regulatory T-cell therapy for liver transplant patients in order to focus resources on a preclinical autoimmune candidate.</description>
+  <pubDate>Feb 5, 2026 6:03am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/8dcff3b4-e3dd-4a35-a644-b6c6cdb265c0</guid>
+    </item>
+<item>
+  <title><a href="/biotech/eikons-upsized-381m-nasdaq-listing-marks-largest-biotech-ipo-2024" hreflang="en">Eikon's upsized $381M Nasdaq listing marks largest biotech IPO since 2024</a></title>
+  <link>https://www.fiercebiotech.com/biotech/eikons-upsized-381m-nasdaq-listing-marks-largest-biotech-ipo-2024</link>
+  <description>Eikon Therapeutics is heading to the Nasdaq this morning with an upsized $381 million IPO in a further sign of the renewed appeal of the public markets.</description>
+  <pubDate>Feb 5, 2026 4:24am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/0ea0665f-f928-4976-bd65-61184f6838bb</guid>
+    </item>
+<item>
+  <title><a href="/pharma/fdas-rare-pediatric-disease-voucher-program-revived-2026-government-funding-bill" hreflang="en">FDA’s rare pediatric disease voucher program revived by 2026 government funding bill</a></title>
+  <link>https://www.fiercebiotech.com/pharma/fdas-rare-pediatric-disease-voucher-program-revived-2026-government-funding-bill</link>
+  <description>By signing a government funding bill that ended a partial shutdown, President Donald Trump has also reauthorized a beloved program meant to speed the development of new drugs for rare childhood diseases.</description>
+  <pubDate>Feb 4, 2026 3:02pm</pubDate>
+    <dc:creator><a href="/person/darren-incorvaia" hreflang="en">Darren Incorvaia</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/663290ea-9cb0-4bb8-860d-43807f405e0f</guid>
+    </item>
+<item>
+  <title><a href="/biotech/lilly-drops-3-pipeline-drugs-including-gene-therapy-1b-prevail-buyout" hreflang="en">Lilly drops 3 pipeline drugs, including gene therapy from $1B Prevail buyout</a></title>
+  <link>https://www.fiercebiotech.com/biotech/lilly-drops-3-pipeline-drugs-including-gene-therapy-1b-prevail-buyout</link>
+  <description>As Eli Lilly awaits an FDA approval decision for its oral GLP-1 orforglipron, the pharma has discarded three clinical-stage drugs, including a gene therapy from its $1 billion acquisition of Prevail Therapeutics.</description>
+  <pubDate>Feb 4, 2026 11:40am</pubDate>
+    <dc:creator><a href="/person/gabrielle-masson-0" hreflang="en">Gabrielle Masson</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/10ea343f-dc84-402b-bd9a-98ab7d5dad8c</guid>
+    </item>
+<item>
+  <title><a href="/biotech/novartis-shakes-early-pipeline-6-assets-nixed-and-2-new-cancer-candidates" hreflang="en">Novartis shakes up early pipeline with 6 culls and 2 new cancer candidates</a></title>
+  <link>https://www.fiercebiotech.com/biotech/novartis-shakes-early-pipeline-6-assets-nixed-and-2-new-cancer-candidates</link>
+  <description>Novartis has nixed six early-stage pipeline programs, swapping in two new phase 1 cancer candidates as replacements.</description>
+  <pubDate>Feb 4, 2026 11:35am</pubDate>
+    <dc:creator><a href="/person/darren-incorvaia" hreflang="en">Darren Incorvaia</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/e17609ef-4986-42f7-9d76-132bf3f34fc3</guid>
+    </item>
+<item>
+  <title><a href="/medtech/hims-hers-sell-grails-galleri-multi-cancer-blood-test-its-digital-health-plan" hreflang="en">Hims &amp; Hers to sell Grail’s Galleri multi-cancer blood test via its digital health platform</a></title>
+  <link>https://www.fiercebiotech.com/medtech/hims-hers-sell-grails-galleri-multi-cancer-blood-test-its-digital-health-plan</link>
+  <description>Telehealth company Hims &amp;amp; Hers has added Grail’s blood cancer test Galleri to its offerings. </description>
+  <pubDate>Feb 4, 2026 9:35am</pubDate>
+    <dc:creator><a href="/person/ben-adams-0" hreflang="en">Ben Adams</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/e9b29f8f-eac3-4b49-8096-980fe0dc42ee</guid>
+    </item>
+<item>
+  <title><a href="/biotech/preclinical-stem-cell-biotech-primegen-takes-spac-route-nasdaq" hreflang="en">Preclinical stem cell biotech PrimeGen takes SPAC route to Nasdaq</a></title>
+  <link>https://www.fiercebiotech.com/biotech/preclinical-stem-cell-biotech-primegen-takes-spac-route-nasdaq</link>
+  <description>Stem cell therapy biotech PrimeGen US is taking the less-traveled SPAC route to the public markets.</description>
+  <pubDate>Feb 4, 2026 9:00am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/74b3656e-61be-4328-a75c-20c05213c70e</guid>
+    </item>
+<item>
+  <title><a href="/medtech/abbott-hit-quality-violations-fda-over-freestyle-libre-cgm-products" hreflang="en">FDA demands better response from Abbott over Libre inspection violations </a></title>
+  <link>https://www.fiercebiotech.com/medtech/abbott-hit-quality-violations-fda-over-freestyle-libre-cgm-products</link>
+  <description>Abbott has been hit with a slew of complaints from the FDA in a warning letter related to its continuous glucose monitor franchise, FreeStyle Libre. </description>
+  <pubDate>Feb 4, 2026 3:14am</pubDate>
+    <dc:creator><a href="/person/ben-adams-0" hreflang="en">Ben Adams</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/854cde67-1d62-48f3-ae4e-77e4cfa74617</guid>
+    </item>
+<item>
+  <title><a href="/medtech/medtronic-steps-half-billion-deal-israeli-devicemaker-cathworks" hreflang="en">Medtronic steps up with up to $585M deal for Israeli devicemaker CathWorks</a></title>
+  <link>https://www.fiercebiotech.com/medtech/medtronic-steps-half-billion-deal-israeli-devicemaker-cathworks</link>
+  <description>Just weeks after announcing it would "step up" its acquisitions this year, Medtronic said it will shell out up to $585 million to buy privately held partner CathWorks, which focuses on coronary artery disease and its treatment.&lt;br&gt;
+</description>
+  <pubDate>Feb 4, 2026 8:47am</pubDate>
+    <dc:creator><a href="/person/joseph-keenan" hreflang="en">Joseph Keenan</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/b8e9e994-8963-46e5-9581-526165ed46f8</guid>
+    </item>
+<item>
+  <title><a href="/biotech/gsks-new-ceo-looking-2-4b-deals-hiding-plain-sight" hreflang="en">GSK's new CEO looking for $2B to $4B deals 'hiding in plain sight'</a></title>
+  <link>https://www.fiercebiotech.com/biotech/gsks-new-ceo-looking-2-4b-deals-hiding-plain-sight</link>
+  <description>Luke Miels had only been at the helm of GSK for 20 days when he signed off on his first multibillion-dollar buyout, and the CEO is clear on what else will attract his interest.</description>
+  <pubDate>Feb 4, 2026 6:29am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/183b0f90-e7a4-4c5f-b3d6-855576b40512</guid>
+    </item>
+<item>
+  <title><a href="/biotech/amgen-advances-toward-lupus-redemption-while-gastric-cancer-candidate-struggles" hreflang="en">Amgen advances toward lupus redemption while gastric cancer candidate struggles</a></title>
+  <link>https://www.fiercebiotech.com/biotech/amgen-advances-toward-lupus-redemption-while-gastric-cancer-candidate-struggles</link>
+  <description>Amgen’s bad luck in lupus may finally be coming to an end. Daxdilimab, a monoclonal antibody acquired from Horizon Therapeutics in 2023, hit the primary endpoint in a phase 2 trial for discoid lupus erythematosus.</description>
+  <pubDate>Feb 3, 2026 6:12pm</pubDate>
+    <dc:creator><a href="/person/darren-incorvaia" hreflang="en">Darren Incorvaia</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/9170a766-a0ab-402e-8caa-13400828a196</guid>
+    </item>
+<item>
+  <title><a href="/biotech/novos-ceo-wishes-pfizer-luck-metsera-drug-still-seeks-own-monthly-glp-1" hreflang="en">Novo's CEO 'wishes Pfizer luck' with Metsera drug but still seeks own monthly GLP-1</a></title>
+  <link>https://www.fiercebiotech.com/biotech/novos-ceo-wishes-pfizer-luck-metsera-drug-still-seeks-own-monthly-glp-1</link>
+  <description>Novo Nordisk’s CEO was magnanimous about Pfizer’s victory in last year’s bidding war over an obesity biotech, but the Danish pharma is making no secret of the fact it remains on the lookout for a similar prize.</description>
+  <pubDate>Feb 4, 2026 5:11am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/b3a862fd-3f20-4cc5-a56b-fc0279cab0e3</guid>
+    </item>
+<item>
+  <title><a href="/medtech/nhs-fit-bowel-cancer-test-reduced-unnecessary-referrals-cancer-numbers-remain-stable" hreflang="en">NHS 'FIT' bowel cancer test reduced unnecessary referrals as cancer numbers remain stable</a></title>
+  <link>https://www.fiercebiotech.com/medtech/nhs-fit-bowel-cancer-test-reduced-unnecessary-referrals-cancer-numbers-remain-stable</link>
+  <description>England’s National Health Service’s fecal immunochemical test has reduced referrals for suspected bowel cancer by 140,000, while the number of cancer cases has remained stable. </description>
+  <pubDate>Feb 3, 2026 5:36am</pubDate>
+    <dc:creator><a href="/person/ben-adams-0" hreflang="en">Ben Adams</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/2b00c56e-4a02-443b-b460-c93ba76494bd</guid>
+    </item>
+<item>
+  <title><a href="/biotech/nih-turmoil-takes-center-stage-director-acknowledges-no-vaccine-autism-link" hreflang="en">NIH turmoil takes center stage as director acknowledges no vaccine-autism link</a></title>
+  <link>https://www.fiercebiotech.com/biotech/nih-turmoil-takes-center-stage-director-acknowledges-no-vaccine-autism-link</link>
+  <description>National Institutes of Health Director Jayanta Bhattacharya, M.D., Ph.D., spent much of a Senate committee hearing dancing around direct answers—except when it came to vaccines, a topic on which he finally delivered a clear view on the technology’s lack of ties to autism.</description>
+  <pubDate>Feb 3, 2026 5:20pm</pubDate>
+    <dc:creator><a href="/person/gabrielle-masson-0" hreflang="en">Gabrielle Masson</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/18d988f2-7ba2-489b-ba4a-1220ba71ee56</guid>
+    </item>
+<item>
+  <title><a href="/biotech/hhs-launches-100-million-antiviral-prize-develop-broad-spectrum-therapies" hreflang="en">HHS launches $100M antiviral prize to develop broad-spectrum therapies</a></title>
+  <link>https://www.fiercebiotech.com/biotech/hhs-launches-100-million-antiviral-prize-develop-broad-spectrum-therapies</link>
+  <description>While the Trump administration may be pivoting away from certain vaccinations, it is pushing for the development of antiviral therapies via the launch of a $100 million antiviral therapy development competition.</description>
+  <pubDate>Feb 3, 2026 2:39pm</pubDate>
+    <dc:creator><a href="/person/will-maddox" hreflang="en">Will Maddox</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/6d249c9f-0e22-4111-9344-436ea5db59c6</guid>
+    </item>
+<item>
+  <title><a href="/cro/charles-river-close-cell-therapy-cdmo-site-lay-20-staffers" hreflang="en">Charles River to close cell therapy CDMO site, lay off 20 staffers</a></title>
+  <link>https://www.fiercebiotech.com/cro/charles-river-close-cell-therapy-cdmo-site-lay-20-staffers</link>
+  <description>Charles River Laboratories is continuing its run of layoffs by announcing the closure of its cell therapy contract development and manufacturing organization (CDMO) site in Hanover, Maryland that will cost the company 20 jobs.  </description>
+  <pubDate>Feb 3, 2026 12:02pm</pubDate>
+    <dc:creator><a href="/person/will-maddox" hreflang="en">Will Maddox</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/e6a67d30-e2ca-432e-b1f7-03d88422f0db</guid>
+    </item>
+<item>
+  <title><a href="/biotech/fda-signals-tailored-approach-carefully-shepherd-car-t-therapy-autoimmune-diseases" hreflang="en">FDA signals tailored approach to ‘carefully shepherd’ CAR-T therapy for autoimmune diseases</a></title>
+  <link>https://www.fiercebiotech.com/biotech/fda-signals-tailored-approach-carefully-shepherd-car-t-therapy-autoimmune-diseases</link>
+  <description>As the first CAR-T treatment for an autoimmune disease draws ever closer, the FDA’s Vinay Prasad, M.D., and colleagues have signaled a willingness to support the development of these novel cell therapies with a flexible regulatory approach.</description>
+  <pubDate>Feb 3, 2026 11:17am</pubDate>
+    <dc:creator><a href="/person/angus-liu-0" hreflang="en">Angus Liu</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/ba52513b-6c3d-4e76-ac67-80c48ea2e943</guid>
+    </item>
+<item>
+  <title><a href="/biotech/fledgling-biotech-exxel-plans-13m-ipo-succeed-where-other-faah-inhibitors-have-failed" hreflang="en">Fledgling biotech Exxel plans $13M IPO to succeed where other FAAH inhibitors have failed</a></title>
+  <link>https://www.fiercebiotech.com/biotech/fledgling-biotech-exxel-plans-13m-ipo-succeed-where-other-faah-inhibitors-have-failed</link>
+  <description>Exxel Pharma is eyeing a listing on the NYSE American to fund human trials for a drug class that has previously struggled to deliver in the clinic.</description>
+  <pubDate>Feb 3, 2026 10:37am</pubDate>
+    <dc:creator><a href="/person/james-waldron" hreflang="en">James Waldron</a></dc:creator>
+    <guid isPermaLink="true">https://www.fiercebiotech.com/afb3eff7-b244-44f1-93bf-5bd64e54b54d</guid>
+    </item>
+
+  </channel>
+</rss>
