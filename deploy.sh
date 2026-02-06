@@ -48,12 +48,29 @@ mkdir -p lambda_package
 
 # Install dependencies
 echo -e "${YELLOW}Installing dependencies...${NC}"
-pip install -r requirements.txt -t lambda_package/ --upgrade
+python3 -m pip install -r requirements.txt -t lambda_package/ --upgrade
+
+# Verify critical dependencies were installed
+MISSING_DEPS=""
+for dep in feedparser pymysql dateutil; do
+    if [ ! -d "lambda_package/${dep}" ] && [ ! -d "lambda_package/${dep//-/_}" ]; then
+        MISSING_DEPS="${MISSING_DEPS} ${dep}"
+    fi
+done
+
+if [ -n "$MISSING_DEPS" ]; then
+    echo -e "${RED}Error: Failed to install dependencies:${MISSING_DEPS}${NC}"
+    echo "Please check your Python/pip installation and try again."
+    exit 1
+fi
 
 # Copy application code
 echo -e "${YELLOW}Copying application code...${NC}"
 cp -r services lambda_package/
 cp lambda_function.py lambda_package/
+
+# Clean up __pycache__ directories to reduce package size
+find lambda_package/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # Create ZIP file
 echo -e "${YELLOW}Creating ZIP archive...${NC}"
