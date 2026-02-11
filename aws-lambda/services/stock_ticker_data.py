@@ -179,6 +179,98 @@ COMPANY_TICKER_MAP = {
         "aliases": []
     },
 
+    # Major Tech Companies
+    "alphabet": {
+        "ticker": "GOOGL",
+        "exchange": "NASDAQ",
+        "full_name": "Alphabet Inc.",
+        "aliases": ["google"]
+    },
+    "apple": {
+        "ticker": "AAPL",
+        "exchange": "NASDAQ",
+        "full_name": "Apple Inc.",
+        "aliases": []
+    },
+    "microsoft": {
+        "ticker": "MSFT",
+        "exchange": "NASDAQ",
+        "full_name": "Microsoft Corporation",
+        "aliases": []
+    },
+    "amazon": {
+        "ticker": "AMZN",
+        "exchange": "NASDAQ",
+        "full_name": "Amazon.com, Inc.",
+        "aliases": []
+    },
+    "meta": {
+        "ticker": "META",
+        "exchange": "NASDAQ",
+        "full_name": "Meta Platforms, Inc.",
+        "aliases": ["facebook"]
+    },
+    "nvidia": {
+        "ticker": "NVDA",
+        "exchange": "NASDAQ",
+        "full_name": "NVIDIA Corporation",
+        "aliases": ["nvda"]
+    },
+    "tesla": {
+        "ticker": "TSLA",
+        "exchange": "NASDAQ",
+        "full_name": "Tesla, Inc.",
+        "aliases": []
+    },
+    "netflix": {
+        "ticker": "NFLX",
+        "exchange": "NASDAQ",
+        "full_name": "Netflix, Inc.",
+        "aliases": []
+    },
+    "intel": {
+        "ticker": "INTC",
+        "exchange": "NASDAQ",
+        "full_name": "Intel Corporation",
+        "aliases": []
+    },
+    "amd": {
+        "ticker": "AMD",
+        "exchange": "NASDAQ",
+        "full_name": "Advanced Micro Devices, Inc.",
+        "aliases": ["advanced micro devices"]
+    },
+    "broadcom": {
+        "ticker": "AVGO",
+        "exchange": "NASDAQ",
+        "full_name": "Broadcom Inc.",
+        "aliases": []
+    },
+    "salesforce": {
+        "ticker": "CRM",
+        "exchange": "NYSE",
+        "full_name": "Salesforce, Inc.",
+        "aliases": []
+    },
+    "oracle": {
+        "ticker": "ORCL",
+        "exchange": "NYSE",
+        "full_name": "Oracle Corporation",
+        "aliases": []
+    },
+    "ibm": {
+        "ticker": "IBM",
+        "exchange": "NYSE",
+        "full_name": "International Business Machines Corporation",
+        "aliases": []
+    },
+    "qualcomm": {
+        "ticker": "QCOM",
+        "exchange": "NASDAQ",
+        "full_name": "QUALCOMM Incorporated",
+        "aliases": []
+    },
+
     # Other Companies (from Bloomberg)
     "palantir": {
         "ticker": "PLTR",

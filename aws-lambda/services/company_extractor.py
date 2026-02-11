@@ -18,22 +18,31 @@ Usage:
     # }
 """
 
+import os
 import re
+import logging
 import spacy
+import pymysql
 from typing import List, Dict, Optional, Set, Tuple
 from .stock_ticker_data import COMPANY_TICKER_MAP, ALIAS_TO_COMPANY
+
+logger = logging.getLogger(__name__)
 
 
 class CompanyExtractor:
     """Extract company names and map them to stock tickers using NER."""
 
-    def __init__(self, model_name: str = "en_core_web_sm"):
+    def __init__(self, model_name: str = "en_core_web_sm", use_db: bool = True,
+                 db_config: Dict = None):
         """
         Initialize the company extractor with a spaCy model.
 
         Args:
             model_name: Name of the spaCy model to use (default: en_core_web_sm)
                        Install with: python -m spacy download en_core_web_sm
+            use_db: If True, attempt to load ticker data from database first.
+                    Falls back to hardcoded data if DB is unavailable.
+            db_config: Database configuration dict. If None, uses env vars.
         """
         try:
             self.nlp = spacy.load(model_name)
@@ -43,11 +52,90 @@ class CompanyExtractor:
                 f"Install it with: python -m spacy download {model_name}"
             )
 
+        self._db_config = db_config
+
         # Build a case-insensitive lookup for faster matching
-        self._build_lookup_index()
+        self._data_source = 'hardcoded'
+        if use_db:
+            try:
+                self._load_from_database()
+                self._data_source = 'database'
+                logger.info(f"CompanyExtractor loaded ticker data from database")
+            except Exception as e:
+                logger.warning(f"DB load failed ({e}), using hardcoded data")
+                self._build_lookup_index()
+        else:
+            self._build_lookup_index()
+
+    def _get_db_connection(self):
+        """Create a database connection using db_config or env vars."""
+        if self._db_config:
+            return pymysql.connect(
+                host=self._db_config['host'],
+                user=self._db_config['user'],
+                password=self._db_config['password'],
+                database=self._db_config['database'],
+                port=int(self._db_config.get('port', 3306)),
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor
+            )
+        return pymysql.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'root'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'news_feed'),
+            port=int(os.environ.get('DB_PORT', 3306)),
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+    def _load_from_database(self):
+        """Load company and alias data from the database."""
+        connection = self._get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                # Load all active companies
+                cursor.execute(
+                    "SELECT id, name, ticker, exchange, full_name "
+                    "FROM companies WHERE is_active = TRUE"
+                )
+                companies = cursor.fetchall()
+
+                # Load all aliases
+                cursor.execute(
+                    "SELECT ca.alias, c.name AS company_name "
+                    "FROM company_aliases ca "
+                    "JOIN companies c ON ca.company_id = c.id "
+                    "WHERE c.is_active = TRUE"
+                )
+                aliases = cursor.fetchall()
+
+            # Build normalized_map from DB rows
+            self.normalized_map = {}
+            for row in companies:
+                self.normalized_map[row['name'].lower()] = (
+                    row['name'],
+                    {
+                        'ticker': row['ticker'],
+                        'exchange': row['exchange'] or '',
+                        'full_name': row['full_name'] or row['name'],
+                    }
+                )
+
+            # Build alias_map: alias -> company name
+            self.alias_map = {}
+            # Add all company names as self-referencing aliases
+            for row in companies:
+                self.alias_map[row['name'].lower()] = row['name'].lower()
+            # Add explicit aliases
+            for row in aliases:
+                self.alias_map[row['alias'].lower()] = row['company_name'].lower()
+
+        finally:
+            connection.close()
 
     def _build_lookup_index(self):
-        """Build efficient lookup structures for company matching."""
+        """Build efficient lookup structures from hardcoded data (fallback)."""
         # Normalize all keys to lowercase for case-insensitive matching
         self.normalized_map = {
             key.lower(): (key, data)
@@ -172,6 +260,33 @@ class CompanyExtractor:
 
         return None
 
+    def _scan_text_for_known_companies(self, text: str) -> List[str]:
+        """
+        Fallback: scan text directly for known company names and aliases.
+        This catches companies that spaCy NER might miss (e.g., 'Alphabet').
+
+        Args:
+            text: Input text to scan
+
+        Returns:
+            List of matched company/alias names found in the text
+        """
+        found = []
+        text_lower = text.lower()
+
+        # Check all known company names and aliases against the text
+        for name in self.alias_map:
+            # Use word boundary matching to avoid partial word matches
+            pattern = r'\b' + re.escape(name) + r'\b'
+            match = re.search(pattern, text_lower)
+            if match:
+                # Use the original casing from the text
+                start, end = match.start(), match.end()
+                original_case = text[start:end]
+                found.append(original_case)
+
+        return found
+
     def extract_companies_and_tickers(self, text: str) -> Dict:
         """
         Extract companies and their tickers from text.
@@ -188,6 +303,10 @@ class CompanyExtractor:
         """
         # Extract organizations using NER
         organizations = self.extract_organizations(text)
+
+        # Fallback: scan text for known company names that NER may have missed
+        fallback_companies = self._scan_text_for_known_companies(text)
+        organizations.extend(fallback_companies)
 
         # Remove duplicates while preserving order
         seen = set()

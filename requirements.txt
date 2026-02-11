@@ -9,5 +9,8 @@ PyMySQL==1.1.0
 # Date/Time Parsing
 python-dateutil==2.8.2
 
+# PDF Report Generation
+fpdf2==2.8.1
+
 # AWS Lambda Runtime (optional, already included in Lambda environment)
 # boto3==1.34.24
