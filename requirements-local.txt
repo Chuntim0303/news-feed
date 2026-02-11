@@ -1,0 +1,14 @@
+# Local NER and Ticker Extraction Requirements
+# Separate from Lambda requirements due to spaCy model size
+
+# Core dependencies (from main requirements.txt)
+feedparser==6.0.11
+PyMySQL==1.1.0
+python-dateutil==2.8.2
+
+# NER and NLP
+spacy==3.7.2
+# Run: python -m spacy download en_core_web_sm
+
+# Additional utilities
+python-dotenv==1.0.0  # For loading .env files locally
