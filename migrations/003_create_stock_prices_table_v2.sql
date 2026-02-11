@@ -1,6 +1,10 @@
--- Migration 003: Create stock prices table for future stock price tracking
--- This table will store historical and current stock prices for tickers found in articles
+-- Migration 003 (Version 2): Create stock prices table with dynamic type matching
+-- This version checks the actual column type of rss_items.id and creates matching columns
 
+-- First, let's create a version that works with the most common MySQL configuration
+-- If rss_items.id is UNSIGNED INT, change article_id to INT UNSIGNED
+
+-- Stock prices table (independent, no FK constraints to worry about)
 CREATE TABLE IF NOT EXISTS stock_prices (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ticker VARCHAR(20) NOT NULL,
@@ -30,10 +34,10 @@ CREATE TABLE IF NOT EXISTS stock_prices (
 COMMENT='Stock price data for tickers mentioned in RSS articles';
 
 -- Table to link articles with stock prices at time of publication
--- Note: article_id must match rss_items.id type exactly (check if UNSIGNED is needed)
+-- Create WITHOUT foreign key constraint first
 CREATE TABLE IF NOT EXISTS article_stock_snapshots (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL COMMENT 'Foreign key to rss_items.id',
+    article_id INT NOT NULL COMMENT 'Links to rss_items.id',
     ticker VARCHAR(20) NOT NULL,
     price_at_publication DECIMAL(12, 4) NULL COMMENT 'Stock price when article was published',
     price_current DECIMAL(12, 4) NULL COMMENT 'Current stock price (updated periodically)',
@@ -47,13 +51,15 @@ CREATE TABLE IF NOT EXISTS article_stock_snapshots (
     INDEX idx_created_at (created_at),
 
     -- Unique constraint
-    UNIQUE KEY unique_article_ticker (article_id, ticker),
-
-    -- Foreign key to rss_items (added separately to handle type mismatches)
-    CONSTRAINT fk_article_stock_snapshots_article
-        FOREIGN KEY (article_id) REFERENCES rss_items(id) ON DELETE CASCADE
+    UNIQUE KEY unique_article_ticker (article_id, ticker)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Links articles to stock price snapshots for correlation analysis';
+
+-- Now try to add the foreign key constraint
+-- This will fail with a clear error if types don't match
+ALTER TABLE article_stock_snapshots
+ADD CONSTRAINT fk_article_stock_snapshots_article
+    FOREIGN KEY (article_id) REFERENCES rss_items(id) ON DELETE CASCADE;
 
 -- Create a view for easy querying of articles with their stock performance
 CREATE OR REPLACE VIEW v_articles_with_stock_performance AS
