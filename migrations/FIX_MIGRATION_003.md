@@ -26,10 +26,24 @@ SHOW CREATE TABLE rss_items;
 Look for the `id` column definition. You'll see one of these:
 - `id INT AUTO_INCREMENT PRIMARY KEY` (signed integer)
 - `id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY` (unsigned integer)
+- `id BIGINT AUTO_INCREMENT PRIMARY KEY` (big integer - **most common**)
+- `id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY` (unsigned big integer)
 
 ## Step 2: Choose the Right Migration
 
-### Option A: If `id` is `INT` (signed) - Most Common
+### Option A: If `id` is `BIGINT` - **MOST COMMON** ⭐
+
+This is the most common configuration. Use:
+
+```bash
+mysql -u your_user -p news_feed < migrations/003_create_stock_prices_table_bigint.sql
+```
+
+### Option B: If `id` is `BIGINT UNSIGNED`
+
+Same as Option A - the bigint migration works for both signed and unsigned BIGINT.
+
+### Option C: If `id` is `INT` (signed)
 
 Use the original migration:
 
@@ -43,7 +57,7 @@ If this fails, try the v2 version which adds the foreign key separately:
 mysql -u your_user -p news_feed < migrations/003_create_stock_prices_table_v2.sql
 ```
 
-### Option B: If `id` is `INT UNSIGNED`
+### Option D: If `id` is `INT UNSIGNED`
 
 Use the unsigned version:
 
@@ -68,7 +82,7 @@ If you're still having issues, create the tables manually without the foreign ke
 ```sql
 -- 1. Create stock_prices table (this should always work)
 CREATE TABLE IF NOT EXISTS stock_prices (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- Use BIGINT to match rss_items
     ticker VARCHAR(20) NOT NULL,
     price DECIMAL(12, 4) NOT NULL,
     price_date DATE NOT NULL,
@@ -80,8 +94,8 @@ CREATE TABLE IF NOT EXISTS stock_prices (
 
 -- 2. Create article_stock_snapshots WITHOUT foreign key
 CREATE TABLE IF NOT EXISTS article_stock_snapshots (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL,  -- Change to INT UNSIGNED if needed
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,  -- Use BIGINT to match rss_items
+    article_id BIGINT NOT NULL,  -- MUST match rss_items.id type exactly
     ticker VARCHAR(20) NOT NULL,
     price_at_publication DECIMAL(12, 4) NULL,
     price_current DECIMAL(12, 4) NULL,
