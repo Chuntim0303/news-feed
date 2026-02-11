@@ -1,8 +1,10 @@
--- Migration 003: Create stock prices table for future stock price tracking
--- This table will store historical and current stock prices for tickers found in articles
+-- Migration 003 (UNSIGNED version): Create stock prices tables
+-- Use this version if your rss_items.id column is INT UNSIGNED
+-- Check by running: SHOW CREATE TABLE rss_items;
 
+-- Stock prices table
 CREATE TABLE IF NOT EXISTS stock_prices (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     ticker VARCHAR(20) NOT NULL,
     price DECIMAL(12, 4) NOT NULL COMMENT 'Stock price',
     open_price DECIMAL(12, 4) NULL COMMENT 'Opening price for the day',
@@ -30,10 +32,9 @@ CREATE TABLE IF NOT EXISTS stock_prices (
 COMMENT='Stock price data for tickers mentioned in RSS articles';
 
 -- Table to link articles with stock prices at time of publication
--- Note: article_id must match rss_items.id type exactly (check if UNSIGNED is needed)
 CREATE TABLE IF NOT EXISTS article_stock_snapshots (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL COMMENT 'Foreign key to rss_items.id',
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    article_id INT UNSIGNED NOT NULL COMMENT 'Foreign key to rss_items.id',
     ticker VARCHAR(20) NOT NULL,
     price_at_publication DECIMAL(12, 4) NULL COMMENT 'Stock price when article was published',
     price_current DECIMAL(12, 4) NULL COMMENT 'Current stock price (updated periodically)',
@@ -41,17 +42,16 @@ CREATE TABLE IF NOT EXISTS article_stock_snapshots (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    -- Foreign key to rss_items
+    FOREIGN KEY (article_id) REFERENCES rss_items(id) ON DELETE CASCADE,
+
     -- Indexes
     INDEX idx_article_id (article_id),
     INDEX idx_ticker (ticker),
     INDEX idx_created_at (created_at),
 
     -- Unique constraint
-    UNIQUE KEY unique_article_ticker (article_id, ticker),
-
-    -- Foreign key to rss_items (added separately to handle type mismatches)
-    CONSTRAINT fk_article_stock_snapshots_article
-        FOREIGN KEY (article_id) REFERENCES rss_items(id) ON DELETE CASCADE
+    UNIQUE KEY unique_article_ticker (article_id, ticker)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Links articles to stock price snapshots for correlation analysis';
 
