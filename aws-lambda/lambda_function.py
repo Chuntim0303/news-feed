@@ -1,13 +1,14 @@
 """
-AWS Lambda Function for RSS Feed Tracking System
+AWS Lambda Function — RSS Feed Ingestion & Ticker Extraction
 
 This Lambda function handles:
 1. Fetching RSS feeds from Bloomberg and Fierce Biotech
 2. Parsing feed items and storing in MySQL database
 3. Extracting company names and stock tickers from articles (spaCy NER)
-4. Fetching stock prices via Twelve Data API
-5. Building article-stock snapshots for news impact analysis
-6. Querying stored feed items and stock performance
+4. Searching stored feed items
+
+Stock price fetching, news impact analysis, and Telegram reports
+have been moved to a separate daily Lambda (aws-lambda-daily).
 
 Environment Variables Required:
 - DB_HOST: MySQL database host
@@ -15,7 +16,6 @@ Environment Variables Required:
 - DB_PASSWORD: MySQL database password
 - DB_NAME: MySQL database name
 - DB_PORT: MySQL database port (default: 3306)
-- TWELVE_DATA_API_KEY: API key for Twelve Data stock prices
 """
 
 import json
@@ -25,8 +25,7 @@ from typing import Dict, Any, List
 
 import pymysql
 
-from services import (BloombergService, FiercebiotechService, CompanyExtractor,
-                     StockPriceService, TelegramReportService)
+from services import BloombergService, FiercebiotechService, CompanyExtractor
 
 # Configure logging
 logger = logging.getLogger()
@@ -119,37 +118,60 @@ def extract_tickers(db_config: Dict[str, str], params: Dict[str, Any] = None) ->
         )
 
         with connection.cursor() as cursor:
-            # Find articles without tickers
+            # Find articles not yet processed for ticker extraction
             cursor.execute(
                 """SELECT id, title, summary FROM rss_items
-                   WHERE stock_tickers IS NULL OR stock_tickers = ''
+                   WHERE ticker_processed = 0
                    ORDER BY published_at DESC
                    LIMIT %s""",
                 (limit,)
             )
             articles = cursor.fetchall()
 
+        logger.info(f"[DEBUG] extract_tickers: found {len(articles)} unprocessed articles (limit={limit})")
+
         if not articles:
             return {'status': 'success', 'message': 'No articles to process', 'processed': 0}
 
         updated = 0
-        for article in articles:
+        for idx, article in enumerate(articles):
             text = article['title'] or ''
             if article.get('summary'):
                 text = f"{text}. {article['summary']}"
 
+            logger.info(f"[DEBUG] extract_tickers [{idx}] id={article['id']} "
+                        f"title={str(article.get('title', ''))[:80]}")
+
             result = extractor.extract_companies_and_tickers(text)
             tickers_str, companies_str = extractor.format_for_database(result)
 
-            if tickers_str:
-                with connection.cursor() as cursor:
+            logger.info(f"[DEBUG] extract_tickers [{idx}] "
+                        f"orgs={result.get('companies', [])}, "
+                        f"tickers={result.get('tickers', [])}, "
+                        f"unmatched={result.get('unmatched', [])}, "
+                        f"tickers_str='{tickers_str}', companies_str='{companies_str}'")
+
+            with connection.cursor() as cursor:
+                if tickers_str:
                     cursor.execute(
                         """UPDATE rss_items
-                           SET stock_tickers = %s, company_names = %s
+                           SET stock_tickers = %s, company_names = %s,
+                               ticker_processed = 1
                            WHERE id = %s""",
                         (tickers_str, companies_str, article['id'])
                     )
-                updated += 1
+                    updated += 1
+                    logger.info(f"[DEBUG] extract_tickers [{idx}] UPDATED article {article['id']} "
+                                f"with tickers={tickers_str}")
+                else:
+                    cursor.execute(
+                        """UPDATE rss_items
+                           SET ticker_processed = 1
+                           WHERE id = %s""",
+                        (article['id'],)
+                    )
+                    logger.info(f"[DEBUG] extract_tickers [{idx}] SKIPPED article {article['id']} "
+                                f"(no tickers found, marked as processed)")
 
         connection.commit()
         logger.info(f"Extracted tickers for {updated}/{len(articles)} articles")
@@ -166,146 +188,6 @@ def extract_tickers(db_config: Dict[str, str], params: Dict[str, Any] = None) ->
     finally:
         if connection:
             connection.close()
-
-
-# ---------------------------------------------------------------------------
-# Stock Price Fetching
-# ---------------------------------------------------------------------------
-
-def fetch_stock_prices(db_config: Dict[str, str], params: Dict[str, Any] = None) -> Dict[str, Any]:
-    """
-    Fetch stock prices for articles that have tickers but no price snapshots yet.
-
-    Params:
-        limit: Max articles to process (default: 50)
-        days_around: Days before/after article date to fetch (default: 2)
-    """
-    params = params or {}
-    limit = int(params.get('limit', 50))
-    days_around = int(params.get('days_around', 2))
-
-    try:
-        service = StockPriceService(db_config=db_config)
-        service.fetch_prices_for_articles(limit=limit, days_around=days_around)
-
-        return {
-            'status': 'success',
-            'message': f'Fetched stock prices (limit={limit}, days_around={days_around})'
-        }
-
-    except Exception as e:
-        logger.error(f"Error fetching stock prices: {e}", exc_info=True)
-        return {'status': 'error', 'error': str(e)}
-
-
-# ---------------------------------------------------------------------------
-# News Impact Analysis
-# ---------------------------------------------------------------------------
-
-def get_news_impact(db_config: Dict[str, str], params: Dict[str, Any] = None) -> Dict[str, Any]:
-    """
-    Get news impact analysis — articles with their stock price changes.
-
-    Params:
-        ticker: Filter by specific ticker
-        limit: Max results (default: 30)
-        sort: 'change' (default) or 'date'
-    """
-    params = params or {}
-    limit = int(params.get('limit', 30))
-    ticker_filter = params.get('ticker')
-    sort = params.get('sort', 'change')
-
-    connection = None
-    try:
-        connection = pymysql.connect(
-            host=db_config['host'],
-            user=db_config['user'],
-            password=db_config['password'],
-            database=db_config['database'],
-            port=int(db_config.get('port', 3306)),
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-        with connection.cursor() as cursor:
-            query = """
-                SELECT
-                    ri.id, ri.title, ri.published_at, ri.stock_tickers, ri.company_names,
-                    ass.ticker, ass.price_at_publication, ass.price_current AS price_next_day,
-                    ass.price_change_since_article AS change_pct,
-                    sp.volume, sp.open_price, sp.close_price, sp.high_price, sp.low_price
-                FROM article_stock_snapshots ass
-                JOIN rss_items ri ON ass.article_id = ri.id
-                LEFT JOIN stock_prices sp ON sp.ticker = ass.ticker
-                    AND sp.price_date = (
-                        SELECT MIN(sp2.price_date) FROM stock_prices sp2
-                        WHERE sp2.ticker = ass.ticker
-                          AND sp2.price_date >= DATE(ri.published_at)
-                    )
-                WHERE ass.price_at_publication IS NOT NULL
-            """
-            query_params = []
-
-            if ticker_filter:
-                query += " AND ass.ticker = %s"
-                query_params.append(ticker_filter)
-
-            if sort == 'date':
-                query += " ORDER BY ri.published_at DESC"
-            else:
-                query += " ORDER BY ABS(ass.price_change_since_article) DESC"
-
-            query += " LIMIT %s"
-            query_params.append(limit)
-
-            cursor.execute(query, query_params)
-            rows = cursor.fetchall()
-
-        # Convert datetimes
-        for row in rows:
-            if row.get('published_at'):
-                row['published_at'] = row['published_at'].isoformat()
-            # Convert Decimal to float for JSON
-            for key in ['price_at_publication', 'price_next_day', 'change_pct',
-                        'open_price', 'close_price', 'high_price', 'low_price']:
-                if row.get(key) is not None:
-                    row[key] = float(row[key])
-            if row.get('volume') is not None:
-                row['volume'] = int(row['volume'])
-
-        return {
-            'status': 'success',
-            'count': len(rows),
-            'items': rows
-        }
-
-    except Exception as e:
-        logger.error(f"Error getting news impact: {e}", exc_info=True)
-        return {'status': 'error', 'error': str(e)}
-    finally:
-        if connection:
-            connection.close()
-
-
-# ---------------------------------------------------------------------------
-# Telegram Report
-# ---------------------------------------------------------------------------
-
-def send_report(db_config: Dict[str, str], params: Dict[str, Any] = None) -> Dict[str, Any]:
-    """
-    Generate a PDF news impact report and send it to Telegram.
-
-    Params:
-        (none required — uses TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID env vars)
-    """
-    try:
-        service = TelegramReportService(db_config=db_config)
-        result = service.generate_and_send_report()
-        return result
-    except Exception as e:
-        logger.error(f"Error sending report: {e}", exc_info=True)
-        return {'status': 'error', 'error': str(e)}
 
 
 # ---------------------------------------------------------------------------
@@ -402,17 +284,17 @@ def search_news(db_config: Dict[str, str], params: Dict[str, Any]) -> Dict[str, 
 
 def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
-    AWS Lambda handler function
+    AWS Lambda handler — RSS Feed Ingestion & Ticker Extraction
 
     Supported actions:
     - fetch_bloomberg: Fetch Bloomberg RSS feed
     - fetch_fiercebiotech: Fetch Fierce Biotech RSS feed
-    - fetch_all: Fetch all feeds + auto-extract tickers
+    - fetch_all: Fetch all feeds + auto-extract tickers (default)
     - extract_tickers: Extract tickers from unprocessed articles
-    - fetch_stock_prices: Fetch stock prices for articles with tickers
-    - news_impact: Get news impact analysis (price/volume changes)
-    - send_report: Generate PDF report and send to Telegram
     - search: Search news items
+
+    Stock prices, news impact analysis, and Telegram reports are handled
+    by the separate daily Lambda (aws-lambda-daily).
 
     Args:
         event: Lambda event object with 'action' and optional 'params'
@@ -440,15 +322,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif action == 'extract_tickers':
             result = extract_tickers(db_config, params)
 
-        elif action == 'fetch_stock_prices':
-            result = fetch_stock_prices(db_config, params)
-
-        elif action == 'news_impact':
-            result = get_news_impact(db_config, params)
-
-        elif action == 'send_report':
-            result = send_report(db_config, params)
-
         elif action == 'search':
             result = search_news(db_config, params)
 
@@ -461,9 +334,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'fetch_fiercebiotech',
                     'fetch_all',
                     'extract_tickers',
-                    'fetch_stock_prices',
-                    'news_impact',
-                    'send_report',
                     'search'
                 ]
             }
@@ -499,9 +369,6 @@ if __name__ == '__main__':
     test_actions = {
         'fetch': {'action': 'fetch_all'},
         'tickers': {'action': 'extract_tickers', 'params': {'limit': 10}},
-        'prices': {'action': 'fetch_stock_prices', 'params': {'limit': 10}},
-        'impact': {'action': 'news_impact', 'params': {'limit': 10}},
-        'report': {'action': 'send_report'},
         'search': {'action': 'search', 'params': {'keyword': 'Alphabet'}},
     }
 

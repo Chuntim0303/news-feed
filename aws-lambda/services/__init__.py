@@ -1,5 +1,8 @@
 """
-Services package for RSS feed tracking system
+Services package for RSS Feed Ingestion & Ticker Extraction Lambda
+
+Stock price fetching, news impact analysis, and Telegram reports
+have been moved to the separate daily Lambda (aws-lambda-daily).
 """
 
 try:
@@ -7,8 +10,8 @@ try:
     from .bloomberg_service import BloombergService
     from .fiercebiotech_service import FiercebiotechService
     from .company_extractor import CompanyExtractor
-    from .stock_price_service import StockPriceService
-    from .telegram_report_service import TelegramReportService
+    from .keyword_alert_service import KeywordAlertService
+    from .news_scoring_service import NewsScoringService
 except ImportError as e:
     raise ImportError(
         f"Failed to import services: {e}. "
@@ -18,5 +21,5 @@ except ImportError as e:
 
 __all__ = [
     'BaseRSSService', 'BloombergService', 'FiercebiotechService',
-    'CompanyExtractor', 'StockPriceService', 'TelegramReportService'
+    'CompanyExtractor', 'KeywordAlertService', 'NewsScoringService'
 ]

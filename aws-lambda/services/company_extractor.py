@@ -96,7 +96,7 @@ class CompanyExtractor:
             with connection.cursor() as cursor:
                 # Load all active companies
                 cursor.execute(
-                    "SELECT id, name, ticker, exchange, full_name "
+                    "SELECT id, name, ticker, exchange, full_name, market_cap_usd "
                     "FROM companies WHERE is_active = TRUE"
                 )
                 companies = cursor.fetchall()
@@ -119,6 +119,7 @@ class CompanyExtractor:
                         'ticker': row['ticker'],
                         'exchange': row['exchange'] or '',
                         'full_name': row['full_name'] or row['name'],
+                        'market_cap_usd': row.get('market_cap_usd'),
                     }
                 )
 
@@ -165,6 +166,8 @@ class CompanyExtractor:
 
         # Extract all ORG entities
         organizations = []
+        all_ents = [(ent.text, ent.label_) for ent in doc.ents]
+        logger.info(f"[DEBUG] NER all entities: {all_ents}")
         for ent in doc.ents:
             if ent.label_ == "ORG":
                 # Clean up the entity text
@@ -172,6 +175,7 @@ class CompanyExtractor:
                 if org_name and len(org_name) > 1:  # Filter out single characters
                     organizations.append(org_name)
 
+        logger.info(f"[DEBUG] NER ORG entities: {organizations}")
         return organizations
 
     def _normalize_company_name(self, name: str) -> str:
@@ -217,6 +221,7 @@ class CompanyExtractor:
             Dict with ticker info if found, None otherwise
         """
         normalized = self._normalize_company_name(company_name)
+        logger.info(f"[DEBUG] find_ticker_info: input='{company_name}', normalized='{normalized}'")
 
         # Try exact match first
         if normalized in self.normalized_map:
@@ -226,12 +231,15 @@ class CompanyExtractor:
                 'matched_key': original_key,
                 'ticker': data['ticker'],
                 'exchange': data['exchange'],
-                'full_name': data['full_name']
+                'full_name': data['full_name'],
+                'market_cap_usd': data.get('market_cap_usd'),
             }
 
         # Try alias match
+        logger.info(f"[DEBUG] find_ticker_info: no exact match, trying alias for '{normalized}'")
         if normalized in self.alias_map:
             matched_company = self.alias_map[normalized]
+            logger.info(f"[DEBUG] find_ticker_info: alias matched '{normalized}' -> '{matched_company}'")
             if matched_company in self.normalized_map:
                 original_key, data = self.normalized_map[matched_company]
                 return {
@@ -240,13 +248,16 @@ class CompanyExtractor:
                     'matched_via': 'alias',
                     'ticker': data['ticker'],
                     'exchange': data['exchange'],
-                    'full_name': data['full_name']
+                    'full_name': data['full_name'],
+                    'market_cap_usd': data.get('market_cap_usd'),
                 }
 
         # Try partial matching (fuzzy match)
+        logger.info(f"[DEBUG] find_ticker_info: no alias match, trying partial for '{normalized}'")
         for key, (original_key, data) in self.normalized_map.items():
             # Check if the normalized company name contains or is contained by a known company
             if normalized in key or key in normalized:
+                logger.info(f"[DEBUG] find_ticker_info: partial match '{normalized}' <-> '{key}' -> {data['ticker']}")
                 # Prefer longer matches (more specific)
                 return {
                     'company': company_name,
@@ -255,9 +266,11 @@ class CompanyExtractor:
                     'ticker': data['ticker'],
                     'exchange': data['exchange'],
                     'full_name': data['full_name'],
+                    'market_cap_usd': data.get('market_cap_usd'),
                     'confidence': 'medium'
                 }
 
+        logger.info(f"[DEBUG] find_ticker_info: NO match for '{company_name}'")
         return None
 
     def _scan_text_for_known_companies(self, text: str) -> List[str]:
@@ -285,6 +298,7 @@ class CompanyExtractor:
                 original_case = text[start:end]
                 found.append(original_case)
 
+        logger.info(f"[DEBUG] _scan_text_for_known_companies: found {found}")
         return found
 
     def extract_companies_and_tickers(self, text: str) -> Dict:
@@ -329,6 +343,10 @@ class CompanyExtractor:
                 tickers_set.add(ticker_info['ticker'])
             else:
                 unmatched.append(org)
+
+        logger.info(f"[DEBUG] extract_companies_and_tickers: "
+                    f"unique_orgs={unique_orgs}, tickers={sorted(list(tickers_set))}, "
+                    f"unmatched={unmatched}")
 
         return {
             'companies': unique_orgs,

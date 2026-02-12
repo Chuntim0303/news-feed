@@ -139,7 +139,7 @@ class BaseRSSService(ABC):
             )
             connection.commit()
 
-    def save_item(self, connection, feed_id: int, item_data: Dict[str, Any]) -> bool:
+    def save_item(self, connection, feed_id: int, item_data: Dict[str, Any]) -> Optional[int]:
         """
         Save a single RSS item to the database
 
@@ -149,7 +149,7 @@ class BaseRSSService(ABC):
             item_data: Parsed item data
 
         Returns:
-            bool: True if item was inserted, False if already exists
+            int: Inserted row ID if new, or None if already exists
         """
         with connection.cursor() as cursor:
             try:
@@ -176,11 +176,11 @@ class BaseRSSService(ABC):
                     )
                 )
                 connection.commit()
-                return True
+                return cursor.lastrowid
             except pymysql.err.IntegrityError as e:
                 # Item already exists (duplicate guid)
                 logger.debug(f"Item already exists: {item_data['guid']}")
-                return False
+                return None
 
     def fetch_and_save(self) -> Dict[str, Any]:
         """
@@ -195,12 +195,27 @@ class BaseRSSService(ABC):
         # Parse RSS feed
         feed = feedparser.parse(feed_url)
 
+        # --- DEBUG: feed-level diagnostics ---
+        logger.info(f"[DEBUG] Feed status: {getattr(feed, 'status', 'N/A')}, "
+                    f"encoding: {getattr(feed, 'encoding', 'N/A')}, "
+                    f"version: {getattr(feed, 'version', 'N/A')}, "
+                    f"bozo: {feed.bozo}, "
+                    f"entries_count: {len(feed.entries)}")
+        if feed.feed:
+            logger.info(f"[DEBUG] Feed title: {feed.feed.get('title', 'N/A')}, "
+                        f"link: {feed.feed.get('link', 'N/A')}")
         if feed.bozo:
             logger.warning(f"Feed parsing warning: {feed.bozo_exception}")
+            logger.warning(f"[DEBUG] Bozo exception type: {type(feed.bozo_exception).__name__}")
 
         connection = None
         new_items = 0
         existing_items = 0
+        alerts_sent = 0
+
+        # Initialize keyword alert service for checking new articles
+        from .keyword_alert_service import KeywordAlertService
+        alert_service = KeywordAlertService(db_config=self.db_config)
 
         try:
             connection = self.get_db_connection()
@@ -211,19 +226,69 @@ class BaseRSSService(ABC):
             # Update feed metadata
             self.update_feed_metadata(connection, feed_id, feed)
 
+            # Get feed title for alert messages
+            feed_title = getattr(self, 'feed_title', None) or feed_url
+
             # Process each item
-            for entry in feed.entries:
+            for idx, entry in enumerate(feed.entries):
                 try:
+                    logger.info(f"[DEBUG] Processing entry {idx}: "
+                                f"title={entry.get('title', 'N/A')[:80]}, "
+                                f"link={entry.get('link', 'N/A')}, "
+                                f"id={entry.get('id', 'N/A')}")
                     item_data = self.parse_item(entry)
-                    if self.save_item(connection, feed_id, item_data):
+                    logger.info(f"[DEBUG] Parsed item: guid={item_data.get('guid', 'N/A')}, "
+                                f"title={str(item_data.get('title', 'N/A'))[:80]}, "
+                                f"published_at={item_data.get('published_at')}")
+                    article_id = self.save_item(connection, feed_id, item_data)
+                    if article_id:
                         new_items += 1
+                        logger.info(f"[DEBUG] NEW item saved: {item_data.get('guid')} (id={article_id})")
+
+                        # Check new article against keyword alerts (with scoring)
+                        try:
+                            # Quick market cap lookup for scoring
+                            market_caps = []
+                            try:
+                                article_text = (item_data.get('title', '') or '') + '. ' + (item_data.get('summary', '') or '')
+                                with connection.cursor() as mc_cursor:
+                                    mc_cursor.execute(
+                                        "SELECT market_cap_usd FROM companies "
+                                        "WHERE is_active = TRUE AND market_cap_usd IS NOT NULL"
+                                    )
+                                    all_caps = {r['market_cap_usd'] for r in mc_cursor.fetchall() if r['market_cap_usd']}
+                                    # Use company_extractor-style scan to find matching companies
+                                    mc_cursor.execute(
+                                        "SELECT name, market_cap_usd FROM companies "
+                                        "WHERE is_active = TRUE AND market_cap_usd IS NOT NULL"
+                                    )
+                                    import re as _re
+                                    for row in mc_cursor.fetchall():
+                                        pattern = r'\b' + _re.escape(row['name'].lower()) + r'\b'
+                                        if _re.search(pattern, article_text.lower()):
+                                            market_caps.append(row['market_cap_usd'])
+                            except Exception:
+                                pass  # market_caps stays empty — scoring uses default multiplier
+
+                            matched = alert_service.check_and_alert(
+                                article_id=article_id,
+                                title=item_data.get('title', ''),
+                                summary=item_data.get('summary', ''),
+                                link=item_data.get('link', ''),
+                                source=feed_title,
+                                market_caps=market_caps
+                            )
+                            if matched:
+                                alerts_sent += len(matched)
+                        except Exception as alert_err:
+                            logger.warning(f"Keyword alert check failed for article {article_id}: {alert_err}")
                     else:
                         existing_items += 1
                 except Exception as e:
-                    logger.error(f"Error processing item: {e}", exc_info=True)
+                    logger.error(f"Error processing item {idx}: {e}", exc_info=True)
                     continue
 
-            return {
+            result = {
                 'status': 'success',
                 'feed_id': feed_id,
                 'feed_url': feed_url,
@@ -231,6 +296,9 @@ class BaseRSSService(ABC):
                 'new_items': new_items,
                 'existing_items': existing_items
             }
+            if alerts_sent > 0:
+                result['alerts_sent'] = alerts_sent
+            return result
 
         except Exception as e:
             logger.error(f"Error fetching RSS feed: {e}", exc_info=True)
