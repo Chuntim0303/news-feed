@@ -58,7 +58,7 @@ def get_db_config() -> Dict[str, str]:
         'user': os.environ.get('DB_USER', 'root'),
         'password': os.environ.get('DB_PASSWORD', ''),
         'database': os.environ.get('DB_NAME', 'test'),
-        'port': os.environ.get('DB_PORT', '3306')
+        'port': int(os.environ.get('DB_PORT', '3306'))
     }
 
 
