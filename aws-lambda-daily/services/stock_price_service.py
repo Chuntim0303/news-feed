@@ -254,7 +254,7 @@ class StockPriceService:
                        LIMIT %s""",
                     (limit,)
                 )
-                new_articles = cursor.fetchall()
+                new_articles = list(cursor.fetchall())
                 logger.info(f"[DAILY] Found {len(new_articles)} articles not yet price-processed")
 
                 # Group 2: Recent articles whose snapshots have NULL prices
@@ -273,7 +273,7 @@ class StockPriceService:
                        LIMIT %s""",
                     (lookback_hours, limit)
                 )
-                retry_articles = cursor.fetchall()
+                retry_articles = list(cursor.fetchall())
                 logger.info(f"[DAILY] Found {len(retry_articles)} articles with incomplete snapshots "
                             f"(within last {lookback_hours}h)")
 
