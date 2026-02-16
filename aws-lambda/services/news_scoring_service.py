@@ -7,9 +7,9 @@ Instead of alerting on every keyword match, articles are scored across multiple 
   Layer 1: Keyword Event Score — user-assigned importance per keyword (1-10)
   Layer 2: Market Cap Multiplier — amplifies scores for small/mid-cap stocks
   Layer 3: Surprise Score — NLP detection of unexpected/beat/miss language
-  Layer 4: Market Reaction Score — (planned, not yet implemented)
+  Layer 4: Market Reaction Score — volume spikes, gaps, trending mentions (0-5)
 
-Final Score = (keyword_sum × cap_multiplier) + surprise_score
+Final Score = (keyword_sum × cap_multiplier) + surprise_score + market_reaction_score
 
 See NEWS_SCORING_MODEL.md for full documentation.
 
@@ -233,7 +233,8 @@ class NewsScoringService:
     # ------------------------------------------------------------------
 
     def score_article(self, text: str, matched_keywords: List[Dict],
-                      market_caps: List[Optional[int]] = None) -> Dict:
+                      market_caps: List[Optional[int]] = None,
+                      market_reaction_score: float = 0.0) -> Dict:
         """
         Compute the composite score for an article.
 
@@ -242,6 +243,8 @@ class NewsScoringService:
             matched_keywords: List of keyword dicts, each with 'event_score'.
             market_caps: List of market caps (one per matched company/ticker).
                          Pass None or empty list if no tickers found.
+            market_reaction_score: Layer 4 market reaction score (0-5).
+                                   Computed asynchronously after initial scoring.
 
         Returns:
             Dict with full score breakdown:
@@ -249,6 +252,7 @@ class NewsScoringService:
                 - score_keyword: sum of keyword event scores
                 - score_cap_mult: market cap multiplier used
                 - score_surprise: surprise score (0-5)
+                - score_market_reaction: market reaction score (0-5)
                 - surprise_dir: 'positive', 'negative', 'mixed', 'none'
                 - surprise_phrases: list of (phrase, score, direction)
         """
@@ -263,15 +267,19 @@ class NewsScoringService:
         # Layer 3: Surprise score
         surprise = self.detect_surprise_phrases(text)
 
+        # Layer 4: Market reaction score (optional, computed asynchronously)
+        reaction_score = market_reaction_score
+
         # Final score
         adjusted_keyword = score_keyword * cap_multiplier
-        score_total = adjusted_keyword + surprise['score']
+        score_total = adjusted_keyword + surprise['score'] + reaction_score
 
         result = {
             'score_total': round(score_total, 2),
             'score_keyword': score_keyword,
             'score_cap_mult': cap_multiplier,
             'score_surprise': surprise['score'],
+            'score_market_reaction': reaction_score,
             'surprise_dir': surprise['direction'],
             'surprise_phrases': surprise['phrases'],
             'market_cap_usd': smallest_cap,
@@ -280,6 +288,7 @@ class NewsScoringService:
         logger.info(
             f"[SCORING] keyword_sum={score_keyword} × cap_mult={cap_multiplier} "
             f"+ surprise={surprise['score']} ({surprise['direction']}) "
+            f"+ reaction={reaction_score} "
             f"= total={score_total:.2f} | "
             f"phrases={[p[0] for p in surprise['phrases']]}"
         )
