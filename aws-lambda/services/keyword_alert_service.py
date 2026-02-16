@@ -70,13 +70,21 @@ class KeywordAlertService:
 
     def get_active_keywords(self) -> List[Dict]:
         """Load all active keywords (including event_score) from the database."""
+        logger.info("[DEBUG] Fetching active keywords from database")
         connection = self._get_connection()
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
                     "SELECT id, keyword, event_score FROM alert_keywords WHERE is_active = 1"
                 )
-                return cursor.fetchall()
+                keywords = cursor.fetchall()
+                logger.info(f"[DEBUG] Loaded {len(keywords)} active keywords")
+                if keywords:
+                    logger.info(f"[DEBUG] Sample keywords: {[k['keyword'] for k in keywords[:5]]}")
+                    logger.info(f"[DEBUG] Score range: {min(k['event_score'] for k in keywords)} - {max(k['event_score'] for k in keywords)}")
+                else:
+                    logger.warning("[DEBUG] No active keywords found in database!")
+                return keywords
         finally:
             connection.close()
 
@@ -193,7 +201,10 @@ class KeywordAlertService:
     def _load_keywords(self):
         """Load and cache keywords for the current invocation."""
         if self._keywords is None:
+            logger.info("[DEBUG] Loading keywords for first time (caching)")
             self._keywords = self.get_active_keywords()
+        else:
+            logger.info(f"[DEBUG] Using cached keywords ({len(self._keywords)} keywords)")
         return self._keywords
 
     def match_keywords(self, text: str) -> List[Dict]:
@@ -207,19 +218,29 @@ class KeywordAlertService:
             List of matched keyword dicts [{'id': ..., 'keyword': ..., 'event_score': ...}, ...]
         """
         if not text:
+            logger.debug("[DEBUG] match_keywords: No text provided")
             return []
 
         keywords = self._load_keywords()
         if not keywords:
+            logger.warning("[DEBUG] match_keywords: No keywords loaded from database")
             return []
 
+        logger.info(f"[DEBUG] Matching against {len(keywords)} keywords")
+        logger.info(f"[DEBUG] Text to match (first 100 chars): {text[:100]}...")
+        
         text_lower = text.lower()
         matched = []
         for kw in keywords:
             pattern = r'\b' + re.escape(kw['keyword']) + r'\b'
             if re.search(pattern, text_lower):
                 matched.append(kw)
+                logger.info(f"[DEBUG] MATCH FOUND: '{kw['keyword']}' (score: {kw['event_score']})")
 
+        logger.info(f"[DEBUG] Total matches: {len(matched)}")
+        if matched:
+            logger.info(f"[DEBUG] Matched keywords: {[m['keyword'] for m in matched]}")
+        
         return matched
 
     # ------------------------------------------------------------------
@@ -312,12 +333,16 @@ class KeywordAlertService:
         Returns:
             List of matched keywords that were logged (regardless of alert)
         """
+        logger.info(f"[DEBUG] check_and_alert called for article_id={article_id}")
+        logger.info(f"[DEBUG] Title: {title}")
+        
         text = title or ''
         if summary:
             text = f"{text}. {summary}"
 
         matched = self.match_keywords(text)
         if not matched:
+            logger.info(f"[DEBUG] No keyword matches for article {article_id}")
             return []
 
         logger.info(f"[ALERT] Article {article_id} matched {len(matched)} keywords: "
@@ -367,9 +392,11 @@ class KeywordAlertService:
                 self._send_telegram_message(msg)
 
             # Log all matches with score breakdown (even if no alert sent)
+            logger.info(f"[DEBUG] Inserting {len(new_matches)} matches into alert_log")
             with connection.cursor() as cursor:
                 for kw in new_matches:
                     try:
+                        logger.info(f"[DEBUG] Logging keyword '{kw['keyword']}' for article {article_id}, score={score_result['score_total']:.2f}")
                         cursor.execute(
                             """INSERT INTO alert_log
                                (rss_item_id, keyword_id, keyword,
@@ -384,7 +411,9 @@ class KeywordAlertService:
                              score_result['surprise_dir'],
                              1 if should_alert else 0)
                         )
-                    except pymysql.err.IntegrityError:
+                        logger.info(f"[DEBUG] Successfully logged keyword '{kw['keyword']}'")
+                    except pymysql.err.IntegrityError as e:
+                        logger.warning(f"[DEBUG] Duplicate entry for keyword '{kw['keyword']}': {e}")
                         pass
             connection.commit()
 

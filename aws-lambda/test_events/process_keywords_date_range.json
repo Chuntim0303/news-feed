@@ -1,0 +1,9 @@
+{
+  "action": "process_keywords",
+  "params": {
+    "limit": 500,
+    "date_from": "2024-01-01",
+    "date_to": "2024-12-31",
+    "unscored_only": true
+  }
+}

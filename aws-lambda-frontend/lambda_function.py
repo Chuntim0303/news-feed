@@ -24,15 +24,23 @@ logger.setLevel(logging.INFO)
 
 def get_db_connection():
     """Create database connection."""
-    return pymysql.connect(
-        host=os.environ.get('DB_HOST', 'localhost'),
-        user=os.environ.get('DB_USER', 'root'),
-        password=os.environ.get('DB_PASSWORD', ''),
-        database=os.environ.get('DB_NAME', 'news_feed'),
-        port=int(os.environ.get('DB_PORT', 3306)),
-        charset='utf8mb4',
-        cursorclass=pymysql.cursors.DictCursor
-    )
+    db_config = {
+        'host': os.environ.get('DB_HOST', 'localhost'),
+        'user': os.environ.get('DB_USER', 'root'),
+        'password': os.environ.get('DB_PASSWORD', ''),
+        'database': os.environ.get('DB_NAME', 'news_feed'),
+        'port': int(os.environ.get('DB_PORT', 3306)),
+        'charset': 'utf8mb4',
+        'cursorclass': pymysql.cursors.DictCursor
+    }
+    logger.info(f"[DEBUG] Connecting to DB: {db_config['host']}:{db_config['port']}/{db_config['database']} as {db_config['user']}")
+    try:
+        conn = pymysql.connect(**db_config)
+        logger.info("[DEBUG] Database connection successful")
+        return conn
+    except Exception as e:
+        logger.error(f"[DEBUG] Database connection failed: {e}", exc_info=True)
+        raise
 
 
 def cors_headers():
@@ -74,6 +82,8 @@ def get_articles_with_returns(params: Dict) -> Dict:
     ticker_filter = params.get('ticker')
     limit = int(params.get('limit', 100))
 
+    logger.info(f"[DEBUG] get_articles_with_returns called with: start_date={start_date}, end_date={end_date}, min_score={min_score}, ticker={ticker_filter}, limit={limit}")
+    
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
@@ -126,8 +136,10 @@ def get_articles_with_returns(params: Dict) -> Dict:
             query += " ORDER BY ri.published_at DESC, al.score_total DESC LIMIT %s"
             query_params.append(limit)
             
+            logger.info(f"[DEBUG] Executing query with params: {query_params}")
             cursor.execute(query, query_params)
             articles = cursor.fetchall()
+            logger.info(f"[DEBUG] Query returned {len(articles)} articles")
 
         # Convert Decimals to floats
         for article in articles:
@@ -135,6 +147,10 @@ def get_articles_with_returns(params: Dict) -> Dict:
                 if isinstance(value, pymysql.converters.Decimal):
                     article[key] = float(value)
 
+        logger.info(f"[DEBUG] Returning {len(articles)} articles")
+        if len(articles) > 0:
+            logger.info(f"[DEBUG] Sample article keys: {list(articles[0].keys())}")
+        
         return response(200, {
             'status': 'success',
             'count': len(articles),
@@ -450,8 +466,11 @@ def get_ticker_performance(params: Dict) -> Dict:
 def lambda_handler(event, context):
     """Main Lambda handler for API Gateway requests."""
     
+    logger.info(f"[DEBUG] Lambda invoked with event: {json.dumps(event, default=str)}")
+    
     # Handle OPTIONS for CORS
     if event.get('httpMethod') == 'OPTIONS':
+        logger.info("[DEBUG] Handling OPTIONS request (CORS preflight)")
         return response(200, {'message': 'OK'})
 
     # Parse request
@@ -459,7 +478,7 @@ def lambda_handler(event, context):
     method = event.get('httpMethod', 'GET')
     params = event.get('queryStringParameters') or {}
 
-    logger.info(f"Request: {method} {path} params={params}")
+    logger.info(f"[DEBUG] Request: {method} {path} params={params}")
 
     # Route to appropriate handler
     try:

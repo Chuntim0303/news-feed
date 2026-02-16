@@ -1,0 +1,7 @@
+{
+  "action": "process_keywords",
+  "params": {
+    "limit": 100,
+    "unscored_only": true
+  }
+}

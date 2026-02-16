@@ -8,9 +8,9 @@ export default function ArticlesView() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
-    start_date: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+    start_date: format(subDays(new Date(), 365), 'yyyy-MM-dd'),
     end_date: format(new Date(), 'yyyy-MM-dd'),
-    min_score: 10,
+    min_score: 5,
     ticker: '',
   })
   const [selectedArticle, setSelectedArticle] = useState(null)

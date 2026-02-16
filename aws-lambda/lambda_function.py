@@ -25,7 +25,7 @@ from typing import Dict, Any, List
 
 import pymysql
 
-from services import BloombergService, FiercebiotechService, CompanyExtractor
+from services import BloombergService, FiercebiotechService, CompanyExtractor, KeywordAlertService
 
 # Configure logging
 logger = logging.getLogger()
@@ -191,6 +191,134 @@ def extract_tickers(db_config: Dict[str, str], params: Dict[str, Any] = None) ->
 
 
 # ---------------------------------------------------------------------------
+# Keyword Alert Processing
+# ---------------------------------------------------------------------------
+
+def process_existing_articles(db_config: Dict[str, str], params: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    Process existing articles against keywords to populate alert_log.
+    Useful when keywords are added/updated and you want to score historical articles.
+    
+    Params:
+        limit: Number of articles to process (default: 100)
+        date_from: Process articles from this date onwards (YYYY-MM-DD)
+        date_to: Process articles up to this date (YYYY-MM-DD)
+        unscored_only: Only process articles not in alert_log (default: True)
+    """
+    params = params or {}
+    limit = int(params.get('limit', 100))
+    date_from = params.get('date_from')
+    date_to = params.get('date_to')
+    unscored_only = params.get('unscored_only', True)
+    
+    logger.info(f"[DEBUG] process_existing_articles called with limit={limit}, date_from={date_from}, date_to={date_to}, unscored_only={unscored_only}")
+    
+    connection = None
+    try:
+        connection = pymysql.connect(
+            host=db_config['host'],
+            user=db_config['user'],
+            password=db_config['password'],
+            database=db_config['database'],
+            port=int(db_config.get('port', 3306)),
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        
+        # Build query to fetch articles
+        with connection.cursor() as cursor:
+            query = """
+                SELECT 
+                    i.id, i.title, i.summary, i.link, 
+                    f.title as source,
+                    i.stock_tickers
+                FROM rss_items i
+                JOIN rss_feeds f ON i.feed_id = f.id
+            """
+            
+            conditions = []
+            query_params = []
+            
+            if unscored_only:
+                conditions.append("i.id NOT IN (SELECT DISTINCT rss_item_id FROM alert_log)")
+            
+            if date_from:
+                conditions.append("DATE(i.published_at) >= %s")
+                query_params.append(date_from)
+            
+            if date_to:
+                conditions.append("DATE(i.published_at) <= %s")
+                query_params.append(date_to)
+            
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+            
+            query += " ORDER BY i.published_at DESC LIMIT %s"
+            query_params.append(limit)
+            
+            logger.info(f"[DEBUG] Fetching articles with query params: {query_params}")
+            cursor.execute(query, query_params)
+            articles = cursor.fetchall()
+            logger.info(f"[DEBUG] Found {len(articles)} articles to process")
+        
+        if not articles:
+            return {
+                'status': 'success',
+                'message': 'No articles found to process',
+                'processed': 0,
+                'matched': 0
+            }
+        
+        # Initialize keyword alert service
+        keyword_service = KeywordAlertService(db_config=db_config)
+        
+        processed_count = 0
+        matched_count = 0
+        
+        for article in articles:
+            article_id = article['id']
+            title = article['title'] or ''
+            summary = article['summary'] or ''
+            link = article['link']
+            source = article['source']
+            
+            logger.info(f"[DEBUG] Processing article {article_id}: {title[:50]}...")
+            
+            # Check and score article
+            matches = keyword_service.check_and_alert(
+                article_id=article_id,
+                title=title,
+                summary=summary,
+                link=link,
+                source=source,
+                market_caps=None
+            )
+            
+            processed_count += 1
+            if matches:
+                matched_count += 1
+                logger.info(f"[DEBUG] Article {article_id} matched {len(matches)} keywords")
+        
+        return {
+            'status': 'success',
+            'message': f'Processed {processed_count} articles, {matched_count} had keyword matches',
+            'processed': processed_count,
+            'matched': matched_count,
+            'articles_checked': [a['id'] for a in articles[:10]]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing existing articles: {e}", exc_info=True)
+        return {
+            'status': 'error',
+            'error': str(e)
+        }
+    finally:
+        if connection:
+            connection.close()
+
+
+# ---------------------------------------------------------------------------
 # Search
 # ---------------------------------------------------------------------------
 
@@ -291,6 +419,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     - fetch_fiercebiotech: Fetch Fierce Biotech RSS feed
     - fetch_all: Fetch all feeds + auto-extract tickers (default)
     - extract_tickers: Extract tickers from unprocessed articles
+    - process_keywords: Process existing articles against keywords
     - search: Search news items
 
     Stock prices, news impact analysis, and Telegram reports are handled
@@ -322,6 +451,9 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif action == 'extract_tickers':
             result = extract_tickers(db_config, params)
 
+        elif action == 'process_keywords':
+            result = process_existing_articles(db_config, params)
+
         elif action == 'search':
             result = search_news(db_config, params)
 
@@ -334,6 +466,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     'fetch_fiercebiotech',
                     'fetch_all',
                     'extract_tickers',
+                    'process_keywords',
                     'search'
                 ]
             }

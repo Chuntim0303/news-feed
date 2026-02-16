@@ -6,7 +6,7 @@ import { api } from '../api/client'
 export default function AlphaCandidates() {
   const [candidates, setCandidates] = useState([])
   const [loading, setLoading] = useState(true)
-  const [targetDate, setTargetDate] = useState(format(subDays(new Date(), 1), 'yyyy-MM-dd'))
+  const [targetDate, setTargetDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'))
 
   useEffect(() => {
     loadCandidates()

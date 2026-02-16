@@ -23,7 +23,7 @@ export default function Dashboard() {
     try {
       setLoading(true)
       const endDate = format(new Date(), 'yyyy-MM-dd')
-      const startDate = format(subDays(new Date(), 30), 'yyyy-MM-dd')
+      const startDate = format(subDays(new Date(), 365), 'yyyy-MM-dd')
 
       const [distResponse, tickerResponse, articlesResponse] = await Promise.all([
         api.getScoreDistribution({ start_date: startDate, end_date: endDate }),
